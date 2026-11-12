@@ -1,0 +1,33 @@
+name: Build Leon APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f LeonDino_Android_Project.zip ] && unzip -q -o LeonDino_Android_Project.zip
+          bash "$(find . -path '*/ci/build.sh' -print -quit)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Leon-the-Dino-APK
+          path: out/Leon-the-Dino.apk
+          if-no-files-found: error
